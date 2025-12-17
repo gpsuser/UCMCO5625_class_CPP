@@ -331,6 +331,3 @@ Carol White: 555-0789
 
 ---
 
-## Submission
-
-Complete all quiz questions and programming tasks. Test your code thoroughly before submission.
