@@ -47,3 +47,11 @@ int main() {
 }
 
 ```
+
+## Output
+
+```
+Bob (25)
+Alice (30)
+Carol (40)
+```
