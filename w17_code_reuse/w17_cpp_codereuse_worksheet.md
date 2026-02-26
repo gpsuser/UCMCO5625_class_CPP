@@ -1,95 +1,96 @@
-# C++ Worksheet
+# C++ Worksheet: Code Organization and Documentation
 
 ## Quiz Section
 
 ### Question 1
 
-Complete the following statement by filling in the blanks using words from the word bank below.
+Complete the following statement by filling in the blanks using words from the word bank below:
 
-The `______ once` directive is an include guard that prevents `______ inclusion` of the same header file. Without it, including the same header twice would cause `______ errors` due to duplicate `______`. The traditional alternative uses `______ HEIGHT_H` and `______ HEIGHT_H` directives, but the modern approach is simpler and widely `______` by compilers.
+"The __________ directive prevents multiple inclusion of the same header file. When using traditional include guards, you would use __________, __________, and __________ preprocessor directives to wrap the header content."
 
-**Word Bank:** #define, supported, #pragma, multiple, compilation, #ifndef, definitions
+**Word Bank:** `#endif`, `#define`, `#pragma once`, `#ifndef`, `#include`, `namespace`
 
 ---
 
 ### Question 2
 
-Complete the following statement by filling in the blanks using words from the word bank below.
+Fill in the blanks using words from the word bank:
 
-Templates require special handling because their compilation is `______-dependent`. The compiler must generate different `______ for each template parameter combination`. This means the implementation must be `______ at compile time`, so we cannot pre-compile templates into `______ files`. Therefore, template declarations and implementations must be in the `______ file`, conventionally using the `______ extension`.
+"Template code must be placed entirely in __________ files because the compiler needs to see the full __________ when instantiating a template. This is different from regular classes where the __________ goes in .h files and the __________ goes in .cpp files."
 
-**Word Bank:** .o, visible, same, .hpp, code, parameter
+**Word Bank:** `.hpp`, `implementation`, `declaration`, `namespace`, `documentation`, `template`
 
 ---
 
 ### Question 3
 
-Complete the following statement by filling in the blanks using words from the word bank below.
+Complete the following statement using words from the word bank:
 
-Doxygen uses special `______ blocks` to generate HTML documentation. The `______ tag provides a short description`, while `______ describes each parameter` and `______ explains the return value`. Template parameters use the `______ tag`. The generated documentation includes class `______`, detailed member descriptions, and `______ functionality` to find classes and methods.
+"In Doxygen comments, the __________ tag provides a short description, the __________ tag describes function parameters, and the __________ tag documents template type parameters. The __________ tag describes what exceptions might be thrown."
 
-**Word Bank:** @param, search, @brief, @tparam, hierarchy, comment, @return
+**Word Bank:** `@param`, `@brief`, `@throw`, `@return`, `@tparam`, `@class`
 
 ---
 
 ### Question 4
 
-Complete the following statement by filling in the blanks using words from the word bank below.
+Fill in the blanks using words from the word bank:
 
-Namespaces create distinct `______ for identifiers` to prevent naming `______`. Code within a namespace can be accessed using `______ qualified names` like `MyNamespace::MyClass`, or by using `______ declarations`. It's important to avoid `using ______` in header files as this pollutes the `______ namespace` for all includers.
+"To use code from a namespace, you can use __________ names like `std::vector`, a __________ declaration like `using std::vector`, or a __________ directive like `using namespace std`. However, you should avoid using __________ directives in header files."
 
-**Word Bank:** global, fully, conflicts, using, scopes, namespace
+**Word Bank:** `qualified`, `using`, `namespace`, `fully`, `inline`, `friend`
 
 ---
 
 ### Question 5
 
-When organizing C++ projects, what is the correct convention for include directives?
+When including header files in C++, which statement is correct?
 
-A) Use angle brackets `< >` for all includes to ensure consistency  
-B) Use quotes `" "` for all includes to search the project directory first  
-C) Use angle brackets `< >` for standard library headers and quotes `" "` for project files  
-D) Use quotes `" "` for standard library headers and angle brackets `< >` for project files
+A) Angle brackets `< >` are used for project files, quotes `" "` are used for system libraries  
+B) Angle brackets `< >` are used for system libraries, quotes `" "` are used for project files  
+C) Both angle brackets and quotes can be used interchangeably  
+D) Quotes search only in the current directory and never in system directories
 
 ---
 
 ### Question 6
 
-Which of the following statements about separating code into .h and .cpp files is correct?
+Which of the following is the PRIMARY reason templates cannot be separated into .h and .cpp files?
 
-A) All class methods should always be implemented in the .cpp file for best practice  
-B) Template classes should have their declaration in .h and implementation in .cpp  
-C) Very short inline functions can be implemented in the header, while multi-line methods go in the .cpp file  
-D) The .h file should contain implementations and the .cpp file should contain declarations
+A) Templates are too complex for the linker to handle  
+B) The compiler must see the full implementation when instantiating templates with specific types  
+C) .cpp files cannot contain template code  
+D) Templates always use inline functions
 
 ---
 
 ### Question 7
 
-What is the best practice regarding namespaces in reusable C++ code?
+What is the best practice for using namespaces in reusable header files?
 
-A) Avoid using namespaces as they add unnecessary complexity  
-B) Use generic namespace names like "Utilities" for flexibility  
-C) Always use `using namespace` directives at the top of header files  
-D) Use descriptive namespace names and avoid `using namespace` in headers
+A) Always use `using namespace std;` at the top of header files  
+B) Never use namespaces in header files  
+C) Avoid `using namespace` directives in headers to prevent polluting the global namespace  
+D) Use `using namespace` for all custom namespaces but not for std
 
 ---
 
 ## Task Section
 
-### Task 1: Multi-File Temperature Class
+### Task 1: Temperature Class with File Separation
 
-Create a Temperature class that converts between Celsius and Fahrenheit. Organize it using proper header/implementation file separation.
+Create a `Temperature` class that stores temperature in Celsius and provides conversion to Fahrenheit. Organize the code using proper header/implementation file separation.
 
 **Requirements:**
-- Create Temperature.h with class declaration
-- Create Temperature.cpp with method implementations
-- Store temperature internally in Celsius (double)
-- Provide methods: getCelsius(), getFahrenheit(), setCelsius(double), setFahrenheit(double)
-- Overload operator<< to output in format: "25.0C (77.0F)"
+- Create `Temperature.h` with the class declaration
+- Create `Temperature.cpp` with the implementation
 - Include proper include guards
+- Implement constructors, getter methods, and a conversion method
+- Test in main.cpp
 
-**Scaffolding - Temperature.h:**
+**Code Scaffolding:**
+
+**Temperature.h:**
 ```cpp
 #pragma once
 #include <iostream>
@@ -98,44 +99,56 @@ class Temperature
 {
 private:
     double celsius;
-
+    
 public:
+    // Default constructor (0 degrees C)
     Temperature();
+    
+    // Constructor with initial temperature
     Temperature(double c);
     
-    // Add method declarations here
+    // Get celsius value
+    double getCelsius() const;
     
+    // Get fahrenheit value
+    double getFahrenheit() const;
+    
+    // Set celsius value
+    void setCelsius(double c);
+    
+    // Overload << operator for output
     friend std::ostream& operator<<(std::ostream& os, const Temperature& t);
 };
 ```
 
-**Scaffolding - Temperature.cpp:**
+**Temperature.cpp:**
 ```cpp
 #include "Temperature.h"
 
-Temperature::Temperature() : celsius(0.0) {}
+// TODO: Implement default constructor
 
-Temperature::Temperature(double c) : celsius(c) {}
+// TODO: Implement parameterized constructor
 
-// Implement methods here
-// Conversion formulas:
-// F = C * 9/5 + 32
-// C = (F - 32) * 5/9
+// TODO: Implement getCelsius()
+
+// TODO: Implement getFahrenheit() 
+// Formula: F = C * 9/5 + 32
+
+// TODO: Implement setCelsius()
+
+// TODO: Implement operator<< to output in format "X°C (Y°F)"
 ```
 
-**Scaffolding - main.cpp:**
+**main.cpp:**
 ```cpp
 #include <iostream>
 #include "Temperature.h"
 
 int main()
 {
-    Temperature t1(25.0);
-    std::cout << "Temperature 1: " << t1 << std::endl;
-    
-    Temperature t2;
-    t2.setFahrenheit(98.6);
-    std::cout << "Temperature 2: " << t2 << std::endl;
+    // TODO: Create temperature objects
+    // TODO: Test all methods
+    // TODO: Display temperatures
     
     return 0;
 }
@@ -143,84 +156,233 @@ int main()
 
 **Sample Output:**
 ```
-Temperature 1: 25.0C (77.0F)
-Temperature 2: 37.0C (98.6F)
+0°C (32°F)
+25°C (77°F)
+100°C (212°F)
+-40°C (-40°F)
 ```
 
 ---
 
-### Task 2: Documented Stack Template
+### Task 2: Generic Maximum Template with Documentation
 
-Create a template-based Stack class with full Doxygen documentation. The stack should store elements in a vector and provide standard stack operations.
+Create a documented template function that finds the maximum of three values using Doxygen-style comments.
 
 **Requirements:**
-- Create Stack.hpp with template class
-- Include Doxygen comments for class and all methods
-- Implement: push(), pop(), top(), isEmpty(), size()
-- Use std::vector for internal storage
-- Include proper documentation tags: @brief, @tparam, @param, @return, @throw
+- Create a template function in a .hpp file
+- Add complete Doxygen documentation
+- The function should work with any comparable type
+- Test with at least two different types
 
-**Scaffolding - Stack.hpp:**
+**Code Scaffolding:**
+
+**MaxFinder.hpp:**
+```cpp
+#pragma once
+
+/**
+ * TODO: Add @brief tag describing the function
+ * 
+ * TODO: Add full description
+ * 
+ * TODO: Add @tparam tag for template parameter T
+ * TODO: Add @param tags for a, b, c parameters
+ * TODO: Add @return tag
+ * TODO: Add @note about type requirements
+ */
+template <typename T>
+T findMaxOfThree(const T& a, const T& b, const T& c)
+{
+    // TODO: Implement logic to find maximum of three values
+    // Hint: Use nested comparisons or find max of (a, max(b, c))
+}
+```
+
+**main.cpp:**
+```cpp
+#include <iostream>
+#include <string>
+#include "MaxFinder.hpp"
+
+int main()
+{
+    // TODO: Test with integers
+    
+    // TODO: Test with doubles
+    
+    // TODO: Test with strings (alphabetical comparison)
+    
+    return 0;
+}
+```
+
+**Sample Output:**
+```
+Maximum of 5, 12, 8: 12
+Maximum of 3.14, 2.71, 9.8: 9.8
+Maximum of apple, zebra, mango: zebra
+```
+
+---
+
+### Task 3: Complete Statistics Library (Challenge)
+
+Create a small statistics library with proper organization: namespace, regular class, template class, and full Doxygen documentation.
+
+**Requirements:**
+- Create a `Stats` namespace
+- Implement a `Dataset` class (regular class with .h/.cpp separation) that stores a name and description
+- Implement a `Calculator` template class (in .hpp) that performs statistical calculations on containers of numeric data
+- Add complete Doxygen documentation for all classes
+- Test both classes together in main.cpp
+
+**Code Scaffolding:**
+
+**Dataset.h:**
+```cpp
+#pragma once
+#include <string>
+
+namespace Stats {
+
+/**
+ * TODO: Add class documentation
+ */
+class Dataset
+{
+private:
+    std::string name;
+    std::string description;
+    
+public:
+    // TODO: Add documentation
+    Dataset();
+    
+    // TODO: Add documentation
+    Dataset(const std::string& n, const std::string& desc);
+    
+    // TODO: Add documentation
+    std::string getName() const;
+    
+    // TODO: Add documentation
+    std::string getDescription() const;
+    
+    // TODO: Add documentation
+    void display() const;
+};
+
+} // namespace Stats
+```
+
+**Dataset.cpp:**
+```cpp
+#include "Dataset.h"
+#include <iostream>
+
+namespace Stats {
+
+// TODO: Implement all Dataset methods
+
+} // namespace Stats
+```
+
+**Calculator.hpp:**
 ```cpp
 #pragma once
 #include <vector>
+#include <numeric>
+#include <algorithm>
 #include <stdexcept>
 
+namespace Stats {
+
 /**
- * @brief A template-based stack data structure
- * 
- * @tparam T The type of elements stored in the stack
+ * TODO: Add template class documentation
+ * TODO: Document template parameter
  */
 template <typename T>
-class Stack
+class Calculator
 {
 private:
     std::vector<T> data;
-
+    
 public:
     /**
-     * @brief Add documentation here
+     * TODO: Add method documentation
      */
-    void push(const T& item)
+    Calculator() {}
+    
+    /**
+     * TODO: Add method documentation
+     */
+    void addValue(T value)
     {
-        // Implement
+        data.push_back(value);
     }
     
     /**
-     * @brief Add documentation here
+     * TODO: Add method documentation
+     * Calculates mean = sum / count
      */
-    void pop()
+    double mean() const
     {
-        // Implement - throw exception if empty
+        // TODO: Implement
+        // Throw exception if data is empty
     }
     
-    // Add remaining methods with documentation
+    /**
+     * TODO: Add method documentation
+     * Returns minimum value in dataset
+     */
+    T min() const
+    {
+        // TODO: Implement using std::min_element
+        // Throw exception if data is empty
+    }
+    
+    /**
+     * TODO: Add method documentation
+     * Returns maximum value in dataset
+     */
+    T max() const
+    {
+        // TODO: Implement using std::max_element
+        // Throw exception if data is empty
+    }
+    
+    /**
+     * TODO: Add method documentation
+     */
+    size_t count() const
+    {
+        return data.size();
+    }
 };
+
+} // namespace Stats
 ```
 
-**Scaffolding - main.cpp:**
+**main.cpp:**
 ```cpp
 #include <iostream>
-#include <string>
-#include "Stack.hpp"
+#include "Dataset.h"
+#include "Calculator.hpp"
+
+using namespace Stats;
 
 int main()
 {
-    Stack<int> intStack;
-    intStack.push(10);
-    intStack.push(20);
-    intStack.push(30);
+    // TODO: Create a Dataset object with name and description
     
-    std::cout << "Top element: " << intStack.top() << std::endl;
-    std::cout << "Stack size: " << intStack.size() << std::endl;
+    // TODO: Create a Calculator<int> object
     
-    intStack.pop();
-    std::cout << "After pop, top: " << intStack.top() << std::endl;
+    // TODO: Add several values to calculator
     
-    Stack<std::string> strStack;
-    strStack.push("Hello");
-    strStack.push("World");
-    std::cout << "String stack top: " << strStack.top() << std::endl;
+    // TODO: Display dataset info
+    
+    // TODO: Display statistics (count, min, max, mean)
+    
+    // TODO: Test with Calculator<double> for decimal values
     
     return 0;
 }
@@ -228,289 +390,21 @@ int main()
 
 **Sample Output:**
 ```
-Top element: 30
-Stack size: 3
-After pop, top: 20
-String stack top: World
-```
+Dataset: Temperature Readings
+Description: Daily temperatures for January
 
----
+Statistics:
+Count: 5
+Minimum: 15
+Maximum: 28
+Mean: 21.2
 
-### Challenge Task: Complete Library System
+Dataset: Rainfall Measurements
+Description: Monthly rainfall in mm
 
-Create a small library system with multiple files, namespaces, and Doxygen documentation. The system should manage books with proper organization.
-
-**Requirements:**
-- Create Book class (Book.h and Book.cpp) with: title, author, ISBN, available status
-- Create Library template (Library.hpp) that can store any type of item
-- Put everything in a "LibrarySystem" namespace
-- Include full Doxygen documentation
-- Book should have: getters, setters, checkout(), returnBook(), operator<<
-- Library should have: addItem(), removeItem(), findItem(), listAll()
-- Create a main.cpp that demonstrates the functionality
-
-**Scaffolding - Book.h:**
-```cpp
-#pragma once
-#include <string>
-#include <iostream>
-
-namespace LibrarySystem {
-
-/**
- * @brief Represents a book in the library system
- */
-class Book
-{
-private:
-    std::string title;
-    std::string author;
-    std::string isbn;
-    bool available;
-
-public:
-    /**
-     * @brief Construct a new Book object
-     * @param t Book title
-     * @param a Book author  
-     * @param i ISBN number
-     */
-    Book(const std::string& t, const std::string& a, const std::string& i);
-    
-    // Add method declarations with documentation
-    
-    friend std::ostream& operator<<(std::ostream& os, const Book& book);
-};
-
-} // namespace LibrarySystem
-```
-
-**Scaffolding - Library.hpp:**
-```cpp
-#pragma once
-#include <vector>
-#include <algorithm>
-#include <iostream>
-
-namespace LibrarySystem {
-
-/**
- * @brief A template class for managing library items
- * @tparam T The type of items to store
- */
-template <typename T>
-class Library
-{
-private:
-    std::vector<T> items;
-    std::string libraryName;
-
-public:
-    /**
-     * @brief Construct a new Library object
-     * @param name The name of the library
-     */
-    Library(const std::string& name) : libraryName(name) {}
-    
-    // Implement methods with documentation
-};
-
-} // namespace LibrarySystem
-```
-
-**Sample Output:**
-```
-=== City Library ===
-Books in library: 3
-
-All Books:
-"1984" by George Orwell [ISBN: 978-0451524935] - Available
-"To Kill a Mockingbird" by Harper Lee [ISBN: 978-0061120084] - Available
-"The Great Gatsby" by F. Scott Fitzgerald [ISBN: 978-0743273565] - Available
-
-Checking out: 1984
-Book checked out successfully
-
-After checkout:
-"1984" by George Orwell [ISBN: 978-0451524935] - Checked Out
-
-Returning book...
-Book returned successfully
-```
-
----
-
-## Standard Thread Library Section
-
-### Threading Task 1: Basic Thread Creation
-
-Create a program that demonstrates basic thread creation and joining using the C++ standard library.
-
-**Requirements:**
-- Create 3 threads that each print a message with their thread ID
-- Each thread should print 5 messages
-- Use std::this_thread::get_id() to get thread ID
-- Properly join all threads before program exits
-
-**Scaffolding:**
-```cpp
-#include <iostream>
-#include <thread>
-#include <string>
-
-void printMessages(const std::string& threadName)
-{
-    // Implement: print 5 messages with thread ID
-    // Format: "[ThreadName] Message X - Thread ID: [id]"
-}
-
-int main()
-{
-    // Create and start 3 threads
-    // Join all threads
-    
-    std::cout << "All threads completed" << std::endl;
-    return 0;
-}
-```
-
-**Sample Output:**
-```
-[Thread-A] Message 1 - Thread ID: 139876543210000
-[Thread-B] Message 1 - Thread ID: 139876543211000
-[Thread-A] Message 2 - Thread ID: 139876543210000
-[Thread-C] Message 1 - Thread ID: 139876543212000
-...
-All threads completed
-```
-
----
-
-### Threading Task 2: Thread-Safe Counter
-
-Implement a thread-safe counter using std::mutex to prevent race conditions.
-
-**Requirements:**
-- Create a Counter class with increment() and getValue() methods
-- Use std::mutex to protect the counter value
-- Create 5 threads that each increment the counter 1000 times
-- Display the final count (should be 5000)
-
-**Scaffolding:**
-```cpp
-#include <iostream>
-#include <thread>
-#include <mutex>
-#include <vector>
-
-class Counter
-{
-private:
-    int count;
-    std::mutex mtx;
-
-public:
-    Counter() : count(0) {}
-    
-    void increment()
-    {
-        // Use std::lock_guard to protect count
-    }
-    
-    int getValue()
-    {
-        // Protect access to count
-    }
-};
-
-void incrementCounter(Counter& counter, int times)
-{
-    // Implement: increment counter 'times' times
-}
-
-int main()
-{
-    Counter counter;
-    std::vector<std::thread> threads;
-    
-    // Create 5 threads, each incrementing 1000 times
-    
-    // Join all threads
-    
-    std::cout << "Final count: " << counter.getValue() << std::endl;
-    return 0;
-}
-```
-
-**Sample Output:**
-```
-Final count: 5000
-```
-
----
-
-### Threading Task 3: Producer-Consumer Pattern
-
-Implement a simple producer-consumer pattern using std::thread, std::mutex, and std::condition_variable.
-
-**Requirements:**
-- Create a shared queue (std::queue<int>)
-- Producer thread adds 10 numbers to the queue (0-9)
-- Consumer thread removes and prints numbers from the queue
-- Use condition_variable to signal when data is available
-- Properly handle queue synchronization
-
-**Scaffolding:**
-```cpp
-#include <iostream>
-#include <thread>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
-
-std::queue<int> dataQueue;
-std::mutex mtx;
-std::condition_variable cv;
-bool finished = false;
-
-void producer()
-{
-    // Produce numbers 0-9
-    // Lock mutex, push to queue, notify consumer
-    // Set finished = true when done
-}
-
-void consumer()
-{
-    // Wait for data using condition_variable
-    // Process items from queue
-    // Continue until finished and queue is empty
-}
-
-int main()
-{
-    std::thread prod(producer);
-    std::thread cons(consumer);
-    
-    prod.join();
-    cons.join();
-    
-    std::cout << "Producer-Consumer completed" << std::endl;
-    return 0;
-}
-```
-
-**Sample Output:**
-```
-Consumer received: 0
-Consumer received: 1
-Consumer received: 2
-Consumer received: 3
-Consumer received: 4
-Consumer received: 5
-Consumer received: 6
-Consumer received: 7
-Consumer received: 8
-Consumer received: 9
-Producer-Consumer completed
+Statistics:
+Count: 4
+Minimum: 23.5
+Maximum: 87.3
+Mean: 51.575
 ```
