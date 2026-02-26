@@ -11,10 +11,9 @@ By the end of this lecture, you should be able to:
 * Implement operator overloading in separate header files
 * Document C++ code using Javadoc-style comments for Doxygen
 * Generate HTML documentation from source code using Doxygen
+* Configure and customize Doxygen settings for project documentation
+* Create complete documented projects with classes, templates, and namespaces
 * Define and use custom namespaces to avoid naming conflicts
-* Create multi-threaded applications using the C++ Standard Thread Library
-* Implement thread synchronization and data sharing between threads
-* Apply threading to solve practical programming problems
 
 ---
 
@@ -25,7 +24,7 @@ By the end of this lecture, you should be able to:
 3. [Working with Templates](#section-3-working-with-templates)
 4. [Code Documentation with Doxygen](#section-4-code-documentation-with-doxygen)
 5. [Namespaces](#section-5-namespaces)
-6. [Standard Thread Library](#section-6-standard-thread-library)
+6. [Complete Doxygen Project Example](#section-6-complete-doxygen-project-example)
 7. [Resources](#resources)
 
 ---
@@ -776,292 +775,420 @@ namespace CO5625::DataStructures {
 
 ---
 
-## Section 6: Standard Thread Library
+## Section 6: Complete Doxygen Project Example
 
-Modern C++ provides robust threading support through the Standard Thread Library (std::thread). This allows programs to execute multiple tasks concurrently, improving performance on multi-core processors.
+This section demonstrates a complete workflow for creating a documented C++ project using Doxygen. We'll build a small project with a class, a template, and a namespace, then generate professional HTML documentation.
 
-### Introduction to std::thread
+### Project Overview
 
-The `<thread>` header provides the std::thread class for creating and managing threads. Unlike older threading libraries (like Boost.Thread or POSIX threads), std::thread is part of the C++ standard and works across platforms.
+We'll create a simple geometry library with:
+* A `Rectangle` class (regular class)
+* A `Container` template (template class)
+* Everything organized in the `Geometry` namespace
 
-### Basic Thread Concepts
-
-A **thread** is an independent sequence of execution within a program. Multiple threads can run concurrently:
-
-```
-Single-threaded:           Multi-threaded:
-    Task A                     Task A
-    Task B                     Task B  (running simultaneously)
-    Task C                     Task C
-```
-
-**Key advantages:**
-* Utilize multiple CPU cores
-* Keep UI responsive while processing
-* Handle multiple clients simultaneously
-* Improve throughput for parallel tasks
-
-**Key challenges:**
-* Race conditions (concurrent access to shared data)
-* Deadlocks (threads waiting for each other)
-* Synchronization overhead
-
-### Thread Lifecycle
+### Project Structure
 
 ```
-Created -> Running -> Joined/Detached -> Terminated
-
-1. Create thread with function/lambda
-2. Thread executes concurrently
-3. Main thread can:
-   - join() - wait for thread to complete
-   - detach() - let thread run independently
-4. Thread terminates when function completes
+GeometryLib/
+├── Rectangle.h
+├── Rectangle.cpp
+├── Container.hpp
+├── main.cpp
+└── Doxyfile (generated)
 ```
 
-### Worked Example 1: Basic Thread Creation
-
-This example demonstrates creating and joining a simple thread:
+### File 1: Rectangle.h
 
 ```cpp
+#pragma once
 #include <iostream>
-#include <thread>
-#include <chrono>
 
-// Function to be executed by thread
-void printNumbers(int count)
+namespace Geometry {
+
+/**
+ * @brief A class representing a rectangle with width and height
+ * 
+ * This class provides basic rectangle operations including area
+ * calculation, perimeter calculation, and comparison operators.
+ * All dimensions are stored as double values.
+ * 
+ * @author Geometry Library Team
+ * @version 1.0
+ */
+class Rectangle
 {
-    for (int i = 1; i <= count; ++i)
+private:
+    double width;   ///< Width of the rectangle in units
+    double height;  ///< Height of the rectangle in units
+
+public:
+    /**
+     * @brief Default constructor
+     * 
+     * Creates a rectangle with width and height of 0.0
+     */
+    Rectangle();
+    
+    /**
+     * @brief Construct a rectangle with specified dimensions
+     * 
+     * @param w The width of the rectangle (must be positive)
+     * @param h The height of the rectangle (must be positive)
+     * @throw std::invalid_argument if width or height is negative
+     */
+    Rectangle(double w, double h);
+    
+    /**
+     * @brief Calculate the area of the rectangle
+     * 
+     * @return The area (width * height)
+     */
+    double area() const;
+    
+    /**
+     * @brief Calculate the perimeter of the rectangle
+     * 
+     * @return The perimeter (2 * width + 2 * height)
+     */
+    double perimeter() const;
+    
+    /**
+     * @brief Get the width of the rectangle
+     * 
+     * @return The width value
+     */
+    double getWidth() const;
+    
+    /**
+     * @brief Get the height of the rectangle
+     * 
+     * @return The height value
+     */
+    double getHeight() const;
+    
+    /**
+     * @brief Set new dimensions for the rectangle
+     * 
+     * @param w The new width (must be positive)
+     * @param h The new height (must be positive)
+     * @throw std::invalid_argument if width or height is negative
+     */
+    void setDimensions(double w, double h);
+    
+    /**
+     * @brief Less-than comparison operator
+     * 
+     * Compares rectangles based on their area
+     * 
+     * @param other The rectangle to compare against
+     * @return true if this rectangle's area is less than other's area
+     */
+    bool operator<(const Rectangle& other) const;
+    
+    /**
+     * @brief Stream insertion operator for output
+     * 
+     * Outputs rectangle in the format: [width x height]
+     * 
+     * @param os The output stream
+     * @param rect The rectangle to output
+     * @return Reference to the output stream
+     */
+    friend std::ostream& operator<<(std::ostream& os, const Rectangle& rect);
+};
+
+} // namespace Geometry
+```
+
+### File 2: Rectangle.cpp
+
+```cpp
+#include "Rectangle.h"
+#include <stdexcept>
+
+namespace Geometry {
+
+Rectangle::Rectangle() : width(0.0), height(0.0) {}
+
+Rectangle::Rectangle(double w, double h) : width(w), height(h)
+{
+    if (w < 0 || h < 0)
     {
-        std::cout << "Thread: " << i << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        throw std::invalid_argument("Width and height must be non-negative");
     }
 }
 
-int main()
+double Rectangle::area() const
 {
-    std::cout << "Main thread starting..." << std::endl;
-    
-    // Create and start a thread
-    std::thread workerThread(printNumbers, 5);
-    
-    // Main thread continues executing
-    for (int i = 1; i <= 5; ++i)
-    {
-        std::cout << "Main: " << i << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(150));
-    }
-    
-    // Wait for worker thread to complete
-    workerThread.join();
-    
-    std::cout << "Main thread finished." << std::endl;
-    
-    return 0;
+    return width * height;
 }
+
+double Rectangle::perimeter() const
+{
+    return 2 * width + 2 * height;
+}
+
+double Rectangle::getWidth() const
+{
+    return width;
+}
+
+double Rectangle::getHeight() const
+{
+    return height;
+}
+
+void Rectangle::setDimensions(double w, double h)
+{
+    if (w < 0 || h < 0)
+    {
+        throw std::invalid_argument("Width and height must be non-negative");
+    }
+    width = w;
+    height = h;
+}
+
+bool Rectangle::operator<(const Rectangle& other) const
+{
+    return this->area() < other.area();
+}
+
+std::ostream& operator<<(std::ostream& os, const Rectangle& rect)
+{
+    os << "[" << rect.width << " x " << rect.height << "]";
+    return os;
+}
+
+} // namespace Geometry
 ```
 
-**Sample Output:**
-```
-Main thread starting...
-Thread: 1
-Main: 1
-Thread: 2
-Thread: 3
-Main: 2
-Thread: 4
-Main: 3
-Thread: 5
-Main: 4
-Main: 5
-Main thread finished.
-```
-
-**Key points:**
-* `std::thread` constructor takes a function and its arguments
-* Both threads execute concurrently
-* `join()` blocks until the thread completes
-* Always join or detach threads before they go out of scope
-
-### Worked Example 2: Thread Synchronization with Mutex
-
-When threads share data, we need synchronization to prevent race conditions:
+### File 3: Container.hpp
 
 ```cpp
-#include <iostream>
-#include <thread>
-#include <mutex>
+#pragma once
 #include <vector>
+#include <algorithm>
+#include <iostream>
 
-std::mutex coutMutex;  // Protects std::cout
-int sharedCounter = 0;
-std::mutex counterMutex;  // Protects sharedCounter
+namespace Geometry {
 
-void incrementCounter(int threadId, int iterations)
+/**
+ * @brief A generic container template class for storing and managing objects
+ * 
+ * This template class provides a wrapper around std::vector with additional
+ * functionality for common operations like finding minimum/maximum elements,
+ * sorting, and displaying contents.
+ * 
+ * @tparam T The type of elements to store (must support operator< and operator<<)
+ * 
+ * @note Type T must be comparable (operator<) for sorting and min/max operations
+ * @note Type T must support stream output (operator<<) for display operations
+ */
+template <typename T>
+class Container
 {
-    for (int i = 0; i < iterations; ++i)
+private:
+    std::vector<T> items;  ///< Internal storage for items
+
+public:
+    /**
+     * @brief Default constructor
+     * 
+     * Creates an empty container
+     */
+    Container() {}
+    
+    /**
+     * @brief Add an item to the container
+     * 
+     * @param item The item to add
+     */
+    void add(const T& item)
     {
-        // Lock mutex before modifying shared data
+        items.push_back(item);
+    }
+    
+    /**
+     * @brief Get the number of items in the container
+     * 
+     * @return The number of items
+     */
+    size_t size() const
+    {
+        return items.size();
+    }
+    
+    /**
+     * @brief Check if the container is empty
+     * 
+     * @return true if container has no items, false otherwise
+     */
+    bool empty() const
+    {
+        return items.empty();
+    }
+    
+    /**
+     * @brief Sort all items in ascending order
+     * 
+     * Uses the operator< of type T for comparison
+     */
+    void sort()
+    {
+        std::sort(items.begin(), items.end());
+    }
+    
+    /**
+     * @brief Find the minimum element
+     * 
+     * @return The smallest element in the container
+     * @throw std::runtime_error if container is empty
+     */
+    T findMin() const
+    {
+        if (items.empty())
         {
-            std::lock_guard<std::mutex> lock(counterMutex);
-            ++sharedCounter;
+            throw std::runtime_error("Cannot find minimum of empty container");
         }
-        
-        // Lock mutex before printing
+        return *std::min_element(items.begin(), items.end());
+    }
+    
+    /**
+     * @brief Find the maximum element
+     * 
+     * @return The largest element in the container
+     * @throw std::runtime_error if container is empty
+     */
+    T findMax() const
+    {
+        if (items.empty())
         {
-            std::lock_guard<std::mutex> lock(coutMutex);
-            std::cout << "Thread " << threadId 
-                      << " incremented counter to " 
-                      << sharedCounter << std::endl;
+            throw std::runtime_error("Cannot find maximum of empty container");
         }
-        
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        return *std::max_element(items.begin(), items.end());
     }
-}
-
-int main()
-{
-    const int numThreads = 3;
-    const int iterations = 5;
     
-    std::vector<std::thread> threads;
-    
-    std::cout << "Starting " << numThreads << " threads..." << std::endl;
-    
-    // Create threads
-    for (int i = 0; i < numThreads; ++i)
+    /**
+     * @brief Display all items in the container
+     * 
+     * Outputs each item on a separate line using operator<<
+     */
+    void display() const
     {
-        threads.push_back(std::thread(incrementCounter, i + 1, iterations));
+        for (const auto& item : items)
+        {
+            std::cout << item << std::endl;
+        }
     }
     
-    // Wait for all threads to complete
-    for (auto& t : threads)
+    /**
+     * @brief Access an item by index
+     * 
+     * @param index The index of the item to access
+     * @return Reference to the item at the specified index
+     * @throw std::out_of_range if index is invalid
+     */
+    T& operator[](size_t index)
     {
-        t.join();
+        return items.at(index);
     }
     
-    std::cout << "\nFinal counter value: " << sharedCounter << std::endl;
-    std::cout << "Expected value: " << (numThreads * iterations) << std::endl;
-    
-    return 0;
-}
+    /**
+     * @brief Access an item by index (const version)
+     * 
+     * @param index The index of the item to access
+     * @return Const reference to the item at the specified index
+     * @throw std::out_of_range if index is invalid
+     */
+    const T& operator[](size_t index) const
+    {
+        return items.at(index);
+    }
+};
+
+} // namespace Geometry
 ```
 
-**Sample Output:**
-```
-Starting 3 threads...
-Thread 1 incremented counter to 1
-Thread 2 incremented counter to 2
-Thread 3 incremented counter to 3
-Thread 1 incremented counter to 4
-Thread 2 incremented counter to 5
-...
-Thread 3 incremented counter to 15
-
-Final counter value: 15
-Expected value: 15
-```
-
-**Key concepts:**
-* `std::mutex` provides mutual exclusion
-* `std::lock_guard` automatically locks/unlocks (RAII pattern)
-* Lock scope should be as small as possible
-* Without mutex, race conditions cause incorrect results
-
-### Race Condition Visualization
-
-```
-Without mutex (race condition):
-Thread 1: Read counter (0) -> Increment (1) -> Write (1)
-Thread 2:      Read counter (0) -> Increment (1) -> Write (1)
-Result: Counter = 1 (should be 2!)
-
-With mutex (synchronized):
-Thread 1: Lock -> Read (0) -> Increment -> Write (1) -> Unlock
-Thread 2:                    Wait -> Lock -> Read (1) -> Increment -> Write (2) -> Unlock
-Result: Counter = 2 (correct!)
-```
-
-### Worked Example 3: Producer-Consumer Pattern
-
-A common threading pattern where one thread produces data and another consumes it:
+### File 4: main.cpp
 
 ```cpp
 #include <iostream>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <queue>
-#include <chrono>
+#include "Rectangle.h"
+#include "Container.hpp"
 
-std::queue<int> dataQueue;
-std::mutex queueMutex;
-std::condition_variable dataCondition;
-bool finished = false;
+using namespace Geometry;
 
-void producer(int itemCount)
-{
-    for (int i = 1; i <= itemCount; ++i)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        
-        {
-            std::lock_guard<std::mutex> lock(queueMutex);
-            dataQueue.push(i);
-            std::cout << "Produced: " << i << std::endl;
-        }
-        
-        // Notify consumer that data is available
-        dataCondition.notify_one();
-    }
-    
-    // Signal completion
-    {
-        std::lock_guard<std::mutex> lock(queueMutex);
-        finished = true;
-    }
-    dataCondition.notify_one();
-}
-
-void consumer()
-{
-    while (true)
-    {
-        std::unique_lock<std::mutex> lock(queueMutex);
-        
-        // Wait for data or completion signal
-        dataCondition.wait(lock, []{ return !dataQueue.empty() || finished; });
-        
-        // Process all available data
-        while (!dataQueue.empty())
-        {
-            int value = dataQueue.front();
-            dataQueue.pop();
-            lock.unlock();
-            
-            std::cout << "Consumed: " << value << std::endl;
-            std::this_thread::sleep_for(std::chrono::milliseconds(150));
-            
-            lock.lock();
-        }
-        
-        // Exit if finished and queue is empty
-        if (finished && dataQueue.empty())
-            break;
-    }
-}
+/**
+ * @file main.cpp
+ * @brief Demonstration program for the Geometry library
+ * 
+ * This program demonstrates the use of the Rectangle class
+ * and Container template with various operations.
+ */
 
 int main()
 {
-    std::cout << "Starting Producer-Consumer example..." << std::endl;
+    std::cout << "=== Rectangle Examples ===" << std::endl;
     
-    std::thread producerThread(producer, 10);
-    std::thread consumerThread(consumer);
+    // Create rectangles
+    Rectangle r1(5.0, 3.0);
+    Rectangle r2(4.0, 4.0);
+    Rectangle r3(6.0, 2.0);
     
-    producerThread.join();
-    consumerThread.join();
+    // Display rectangles
+    std::cout << "Rectangle 1: " << r1 << std::endl;
+    std::cout << "  Area: " << r1.area() << std::endl;
+    std::cout << "  Perimeter: " << r1.perimeter() << std::endl;
     
-    std::cout << "All items processed." << std::endl;
+    std::cout << "Rectangle 2: " << r2 << std::endl;
+    std::cout << "  Area: " << r2.area() << std::endl;
+    
+    std::cout << "Rectangle 3: " << r3 << std::endl;
+    std::cout << "  Area: " << r3.area() << std::endl;
+    
+    // Comparison
+    if (r1 < r2)
+        std::cout << "\nRectangle 1 has smaller area than Rectangle 2" << std::endl;
+    
+    std::cout << "\n=== Container Examples ===" << std::endl;
+    
+    // Create container of rectangles
+    Container<Rectangle> rectContainer;
+    rectContainer.add(r1);
+    rectContainer.add(r2);
+    rectContainer.add(r3);
+    
+    std::cout << "Container has " << rectContainer.size() << " rectangles" << std::endl;
+    
+    std::cout << "\nBefore sorting:" << std::endl;
+    rectContainer.display();
+    
+    rectContainer.sort();
+    
+    std::cout << "\nAfter sorting (by area):" << std::endl;
+    rectContainer.display();
+    
+    std::cout << "\nMinimum rectangle: " << rectContainer.findMin() << std::endl;
+    std::cout << "Maximum rectangle: " << rectContainer.findMax() << std::endl;
+    
+    // Container with integers
+    std::cout << "\n=== Integer Container ===" << std::endl;
+    Container<int> intContainer;
+    intContainer.add(42);
+    intContainer.add(17);
+    intContainer.add(99);
+    intContainer.add(8);
+    
+    std::cout << "Before sorting:" << std::endl;
+    intContainer.display();
+    
+    intContainer.sort();
+    
+    std::cout << "\nAfter sorting:" << std::endl;
+    intContainer.display();
+    
+    std::cout << "\nMin: " << intContainer.findMin() << std::endl;
+    std::cout << "Max: " << intContainer.findMax() << std::endl;
     
     return 0;
 }
@@ -1069,130 +1196,272 @@ int main()
 
 **Sample Output:**
 ```
-Starting Producer-Consumer example...
-Produced: 1
-Consumed: 1
-Produced: 2
-Produced: 3
-Consumed: 2
-Produced: 4
-Consumed: 3
-Produced: 5
-Consumed: 4
-...
-Consumed: 10
-All items processed.
+=== Rectangle Examples ===
+Rectangle 1: [5 x 3]
+  Area: 15
+  Perimeter: 16
+Rectangle 2: [4 x 4]
+  Area: 16
+Rectangle 3: [6 x 2]
+  Area: 12
+
+Rectangle 1 has smaller area than Rectangle 2
+
+=== Container Examples ===
+Container has 3 rectangles
+
+Before sorting:
+[5 x 3]
+[4 x 4]
+[6 x 2]
+
+After sorting (by area):
+[6 x 2]
+[5 x 3]
+[4 x 4]
+
+Minimum rectangle: [6 x 2]
+Maximum rectangle: [4 x 4]
+
+=== Integer Container ===
+Before sorting:
+42
+17
+99
+8
+
+After sorting:
+8
+17
+42
+99
+
+Min: 8
+Max: 99
 ```
 
-**Key concepts:**
-* `std::condition_variable` allows threads to wait for events
-* Producer signals consumer when data is ready
-* Consumer waits efficiently (no busy-waiting)
-* Flag indicates when production is complete
+### Generating Documentation with Doxygen
 
-### Threading Tasks
+Now let's generate the HTML documentation for this project.
 
-Now try these exercises to practice multi-threaded programming:
+**Step 1: Generate the Doxyfile configuration**
 
-**Task 1: Parallel Array Sum**
-
-Create a program that splits an array into sections and uses multiple threads to calculate partial sums, then combines them for the total sum.
-
-Requirements:
-* Create an array of 1000 integers
-* Use 4 threads to sum different sections
-* Combine results to get total sum
-* Compare performance with single-threaded version
-
-**Task 2: Thread-Safe Logger**
-
-Implement a simple logging system where multiple threads can write log messages without corruption.
-
-Requirements:
-* Create a Logger class with a log() method
-* Use mutex to protect file/console output
-* Create 5 threads that each write 10 log messages
-* Each message should include thread ID and timestamp
-* Ensure all messages are written correctly
-
-**Task 3: Parallel File Search**
-
-Create a program that searches for a string in multiple files using parallel threads.
-
-Requirements:
-* Create 5 text files with random content
-* Search for a specific word across all files
-* Use one thread per file
-* Collect and display results showing which files contain the word
-* Report total time taken
-
-### Thread Synchronization Primitives Summary
-
-| Primitive | Purpose | Use When |
-|-----------|---------|----------|
-| `std::mutex` | Mutual exclusion | Protecting shared data |
-| `std::lock_guard` | Scoped locking | Simple lock/unlock pattern |
-| `std::unique_lock` | Flexible locking | Need to manually unlock or use with condition variables |
-| `std::condition_variable` | Thread notification | Waiting for events or conditions |
-| `std::atomic` | Lock-free operations | Simple counters or flags |
-
-### Threading Best Practices
-
-1. **Minimize shared state** - Less sharing means fewer synchronization issues
-2. **Keep critical sections small** - Hold locks for minimal time
-3. **Avoid deadlocks** - Always acquire multiple locks in the same order
-4. **Use RAII for locks** - `lock_guard` and `unique_lock` prevent forgetting to unlock
-5. **Consider std::atomic** - For simple shared variables, atomics are faster than mutexes
-6. **Test with thread sanitizers** - Tools can detect race conditions and deadlocks
-7. **Document thread safety** - Clearly indicate which functions are thread-safe
-
-### Common Threading Pitfalls
-
-**Pitfall 1: Forgetting to join or detach**
-```cpp
-// BAD - thread object destroyed before thread completes
-{
-    std::thread t(someFunction);
-} // t destroyed - std::terminate() called!
-
-// GOOD
-{
-    std::thread t(someFunction);
-    t.join(); // or t.detach();
-}
+In the project directory, run:
+```bash
+doxygen -g
 ```
 
-**Pitfall 2: Returning reference to local data**
-```cpp
-// BAD - data destroyed before thread uses it
-void createThread()
-{
-    int localData = 42;
-    std::thread t([&](){ std::cout << localData; });
-    t.detach(); // localData destroyed when function returns!
-}
+This creates a `Doxyfile` with default settings.
 
-// GOOD - pass by value
-void createThread()
-{
-    int localData = 42;
-    std::thread t([localData](){ std::cout << localData; });
-    t.detach(); // safe - localData copied
-}
+**Step 2: Edit the Doxyfile**
+
+Open the Doxyfile and modify these key settings:
+
+```bash
+PROJECT_NAME           = "Geometry Library"
+PROJECT_BRIEF          = "A simple C++ library for geometric shapes"
+PROJECT_NUMBER         = 1.0
+OUTPUT_DIRECTORY       = ./docs
+INPUT                  = .
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+GENERATE_LATEX         = NO
+HAVE_DOT               = NO
 ```
 
-**Pitfall 3: Data races**
-```cpp
-// BAD - no synchronization
-int counter = 0;
-std::thread t1([&](){ ++counter; });
-std::thread t2([&](){ ++counter; });
+**Step 3: Generate the documentation**
 
-// GOOD - use atomic or mutex
-std::atomic<int> counter(0);
-std::thread t1([&](){ ++counter; });
-std::thread t2([&](){ ++counter; });
+Run Doxygen:
+```bash
+doxygen Doxyfile
 ```
+
+This will create a `docs/` directory with HTML documentation.
+
+**Step 4: View the documentation**
+
+Open the generated documentation:
+```bash
+# On Linux/Mac
+open docs/html/index.html
+
+# On Windows
+start docs/html/index.html
+
+# Or simply navigate to the file in your browser
+```
+
+### What the Generated Documentation Looks Like
+
+The generated HTML documentation will include several sections:
+
+**Main Page (index.html):**
+```
+=====================================================
+        Geometry Library Documentation
+           Version 1.0
+=====================================================
+
+A simple C++ library for geometric shapes
+
+Classes | Namespaces | Files
+
+Quick Links:
+- Class List
+- Namespace List
+- File List
+```
+
+**Namespace Page (namespace_geometry.html):**
+```
+Geometry Namespace Reference
+
+Classes:
+  Rectangle - A class representing a rectangle with 
+              width and height
+  Container<T> - A generic container template class 
+                 for storing and managing objects
+
+Functions:
+  std::ostream& operator<< - Stream insertion operator
+```
+
+**Rectangle Class Page (class_geometry_rectangle.html):**
+```
+Geometry::Rectangle Class Reference
+
+A class representing a rectangle with width and height
+
+#include <Rectangle.h>
+
+Public Member Functions:
+  Rectangle()
+    Default constructor
+    
+  Rectangle(double w, double h)
+    Construct a rectangle with specified dimensions
+    Parameters:
+      w - The width of the rectangle (must be positive)
+      h - The height of the rectangle (must be positive)
+    Throws:
+      std::invalid_argument if width or height is negative
+      
+  double area() const
+    Calculate the area of the rectangle
+    Returns:
+      The area (width * height)
+      
+  double perimeter() const
+    Calculate the perimeter of the rectangle
+    Returns:
+      The perimeter (2 * width + 2 * height)
+      
+  [... more methods listed ...]
+
+Private Attributes:
+  double width
+    Width of the rectangle in units
+    
+  double height
+    Height of the rectangle in units
+
+Detailed Description:
+This class provides basic rectangle operations including 
+area calculation, perimeter calculation, and comparison 
+operators. All dimensions are stored as double values.
+
+Author: Geometry Library Team
+Version: 1.0
+```
+
+**Container Template Page (class_geometry_container.html):**
+```
+Geometry::Container<T> Template Class Reference
+
+A generic container template class for storing and 
+managing objects
+
+#include <Container.hpp>
+
+Template Parameters:
+  T - The type of elements to store (must support 
+      operator< and operator<<)
+
+Public Member Functions:
+  Container()
+    Default constructor
+    
+  void add(const T& item)
+    Add an item to the container
+    Parameters:
+      item - The item to add
+      
+  size_t size() const
+    Get the number of items in the container
+    Returns:
+      The number of items
+      
+  void sort()
+    Sort all items in ascending order
+    
+  T findMin() const
+    Find the minimum element
+    Returns:
+      The smallest element in the container
+    Throws:
+      std::runtime_error if container is empty
+      
+  [... more methods listed ...]
+
+Notes:
+- Type T must be comparable (operator<) for sorting 
+  and min/max operations
+- Type T must support stream output (operator<<) for 
+  display operations
+```
+
+**File Documentation (Rectangle_8h.html):**
+```
+Rectangle.h File Reference
+
+#include <iostream>
+
+Classes:
+  class Geometry::Rectangle
+    A class representing a rectangle with width and height
+
+Namespaces:
+  namespace Geometry
+```
+
+### Key Features in Generated Documentation
+
+The Doxygen output provides:
+
+1. **Class Hierarchy** - Shows inheritance relationships (if any)
+2. **Detailed Member Documentation** - Each method with parameters and return values
+3. **Cross-References** - Clickable links between related classes
+4. **Search Functionality** - Search bar to find classes, methods, etc.
+5. **Source Code Links** - Links to view actual source code
+6. **Collaboration Diagrams** - Visual representation of class relationships (if Graphviz is installed)
+7. **Namespace Organization** - All classes organized by namespace
+8. **Parameter Documentation** - Each parameter explained with @param tags
+9. **Exception Documentation** - Lists all exceptions that may be thrown
+10. **Template Documentation** - Template parameters clearly documented
+
+### Doxygen Best Practices Summary
+
+* Use `@brief` for short descriptions (shown in lists)
+* Use `@param` for each parameter
+* Use `@return` to describe return values
+* Use `@throw` or `@exception` for exceptions
+* Use `@tparam` for template parameters
+* Use `@note` and `@warning` for additional information
+* Document member variables with `///<` for inline comments
+* Keep descriptions concise but complete
+* Update documentation when code changes
 
 [Back to Table of Contents](#table-of-contents)
 
@@ -1203,25 +1472,25 @@ std::thread t2([&](){ ++counter; });
 ### Official Documentation
 * **C++ Reference**: https://en.cppreference.com/
   * Header files: https://en.cppreference.com/w/cpp/header
-  * Threading: https://en.cppreference.com/w/cpp/thread
 * **ISO C++ Standards**: https://isocpp.org/
 * **Doxygen Manual**: https://www.doxygen.nl/manual/index.html
+* **Doxygen Download**: https://www.doxygen.nl/download.html
 
 ### Project Organization
 * **Google C++ Style Guide**: https://google.github.io/styleguide/cppguide.html
 * **C++ Core Guidelines**: https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines
+* **Organizing Code Files**: https://isocpp.org/wiki/faq/coding-standards#organize-files
 
-### Threading Resources
-* **C++ Concurrency in Action** by Anthony Williams - Comprehensive threading guide
-* **Thread Support Library**: https://en.cppreference.com/w/cpp/thread
-* **Mutex Reference**: https://en.cppreference.com/w/cpp/thread/mutex
-* **Condition Variables**: https://en.cppreference.com/w/cpp/thread/condition_variable
+### Documentation Tools and Resources
+* **Doxygen Tags Reference**: https://www.doxygen.nl/manual/commands.html
+* **Javadoc Style Guide**: https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html
+* **Graphviz** (for Doxygen diagrams): https://graphviz.org/
+* **Doxygen Awesome CSS**: https://jothepro.github.io/doxygen-awesome-css/ (styling for documentation)
 
-### Tools
-* **Doxygen**: https://www.doxygen.nl/index.html - Documentation generator
-* **CMake**: https://cmake.org/ - Build system for multi-file projects
-* **Valgrind**: https://valgrind.org/ - Memory and threading analysis (Linux)
-* **Thread Sanitizer**: Part of Clang/GCC - Detects data races
+### Build Systems for Multi-File Projects
+* **CMake**: https://cmake.org/ - Cross-platform build system
+* **Make Tutorial**: https://makefiletutorial.com/
+* **CMake Tutorial**: https://cmake.org/cmake/help/latest/guide/tutorial/index.html
 
 ### Practice and Learning
 * **LeetCode**: https://leetcode.com/problemset/ - Algorithm practice
@@ -1239,7 +1508,8 @@ std::thread t2([&](){ ++counter; });
 * **The C++ Programming Language** by Bjarne Stroustrup
 * **Effective C++** by Scott Meyers
 * **Modern C++ Design** by Andrei Alexandrescu
-* **C++ Concurrency in Action** by Anthony Williams
+* **Large-Scale C++ Software Design** by John Lakos
+* **API Design for C++** by Martin Reddy
 
 ---
 
